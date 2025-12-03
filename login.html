@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in • AI Study Hub</title>
+    <style>
+        :root {
+            --cream: #f1f3e0;
+            --sage: #d2dcb6;
+            --moss: #a1bc98;
+            --pine: #778873;
+            --slate: #2f3021;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 20%, rgba(161, 188, 152, 0.4), transparent 50%), linear-gradient(135deg, var(--cream), #e4ebc6);
+            color: var(--slate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            width: min(420px, 100%);
+            background: rgba(255, 255, 255, 0.75);
+            padding: 2.5rem;
+            border-radius: 1.75rem;
+            box-shadow: 0 40px 70px rgba(47, 48, 33, 0.15);
+            border: 1px solid rgba(161, 188, 152, 0.45);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--pine);
+        }
+
+        p {
+            color: rgba(47, 48, 33, 0.75);
+            margin: 0.75rem 0 2rem;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 0.95rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            background: #fff;
+            color: var(--slate);
+            box-shadow: 0 12px 25px rgba(47, 48, 33, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 35px rgba(47, 48, 33, 0.2);
+        }
+
+        button img {
+            width: 22px;
+            height: 22px;
+        }
+
+        small {
+            display: block;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: rgba(47, 48, 33, 0.6);
+        }
+
+        small code {
+            background: rgba(161, 188, 152, 0.2);
+            padding: 0.1rem 0.25rem;
+            border-radius: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p>Sign in with Google to unlock the AI study dashboard and flashcard studio.</p>
+        <button id="google-signin">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" />
+            Continue with Google
+        </button>
+        <small>Update the Firebase config inside <code>login.html</code> with your project keys before deploying.</small>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+        // TODO: Replace with your Firebase project configuration.
+        const firebaseConfig = {
+    apiKey: "AIzaSyDNjU_wtW_kwdlnWyrnJswdI7QdeU9txu0",
+    authDomain: "jaithapudar.firebaseapp.com",
+    projectId: "jaithapudar",
+    storageBucket: "jaithapudar.firebasestorage.app",
+    messagingSenderId: "350150766576",
+    appId: "1:350150766576:web:63783f81d9ef4fd7af7735",
+    measurementId: "G-5GQ8F4L2LY"
+  };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        document.getElementById("google-signin").addEventListener("click", async () => {
+            try {
+                await auth.signInWithPopup(provider);
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Google sign-in failed:", error);
+                alert("Google sign-in failed. Check the console for details.");
+            }
+        });
+    </script>
+</body>
+</html>
+

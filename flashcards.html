@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashcard Studio</title>
+    <style>
+        :root {
+            --cream: #f1f3e0;
+            --sage: #d2dcb6;
+            --moss: #a1bc98;
+            --pine: #778873;
+            --text-dark: #2c2d1f;
+            --text-muted: #4f5139;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: linear-gradient(120deg, var(--cream), #e5ecc4);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 3.5rem 1.25rem 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 7vw, 3.8rem);
+            color: var(--pine);
+        }
+
+        p.lead {
+            max-width: 680px;
+            margin: 0.75rem auto 0;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        section {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1.75rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 30px 60px rgba(119, 136, 115, 0.2);
+            border: 1px solid rgba(161, 188, 152, 0.5);
+        }
+
+        section h2 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        section h2 span {
+            font-size: 0.9rem;
+            color: var(--pine);
+            letter-spacing: 0.1em;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+
+        textarea, input {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid rgba(119, 136, 115, 0.35);
+            padding: 0.9rem 1rem;
+            font-size: 1rem;
+            font-family: inherit;
+            background: rgba(241, 243, 224, 0.65);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            padding: 0.85rem 1.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .primary-btn {
+            background: linear-gradient(120deg, var(--moss), var(--pine));
+            color: #fff;
+            box-shadow: 0 15px 30px rgba(119, 136, 115, 0.3);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--pine);
+            border: 1px solid rgba(119, 136, 115, 0.4);
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.2rem;
+        }
+
+        .flashcard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            position: relative;
+            border-radius: 1.35rem;
+            min-height: 210px;
+            perspective: 1400px;
+            outline: none;
+        }
+
+        .card:focus-visible {
+            box-shadow: 0 0 0 3px rgba(161, 188, 152, 0.6);
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card:hover .card-inner,
+        .card.is-flipped .card-inner,
+        .card.force-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            padding: 1.3rem;
+            border-radius: inherit;
+            border: 1px solid rgba(119, 136, 115, 0.35);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.65rem;
+            box-shadow: 0 25px 45px rgba(119, 136, 115, 0.25);
+        }
+
+        .card-front {
+            background: var(--sage);
+            color: var(--pine);
+        }
+
+        .card-back {
+            background: var(--pine);
+            color: #f5f7eb;
+            transform: rotateY(180deg);
+        }
+
+        .card-face h3 {
+            margin: 0;
+            font-size: 1.15rem;
+        }
+
+        .card-face p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .eyebrow {
+            letter-spacing: 0.18em;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: rgba(44, 45, 31, 0.7);
+        }
+
+        .card-back .eyebrow {
+            color: rgba(241, 243, 224, 0.8);
+        }
+
+        .hint {
+            font-style: italic;
+            color: rgba(44, 45, 31, 0.7);
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        nav {
+            position: fixed;
+            top: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(6px);
+            padding: 0.55rem 1.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(161, 188, 152, 0.5);
+            display: flex;
+            gap: 1.25rem;
+            font-weight: 600;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--pine);
+        }
+
+        @media (max-width: 640px) {
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            section {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">← Back to dashboard</a>
+    </nav>
+    <header>
+        <h1>Flashcard Studio</h1>
+        <p class="lead">Craft focused prompts, reveal answers when ready, and shuffle decks—all themed with a calming sage palette inspired by Color Hunt’s curated tones.<sup>*</sup></p>
+    </header>
+
+    <main>
+        <section aria-labelledby="create-title">
+            <h2 id="create-title">Create cards <span>// capture knowledge</span></h2>
+            <form id="flashcard-form" class="form-grid" autocomplete="off">
+                <div>
+                    <label for="question">Question / Cue</label>
+                    <textarea id="question" rows="2" placeholder="e.g., Outline the steps in gradient descent." required></textarea>
+                </div>
+                <div>
+                    <label for="answer">Answer / Key insight</label>
+                    <textarea id="answer" rows="3" placeholder="Initialize parameters, compute gradients..." required></textarea>
+                </div>
+                <button class="primary-btn" type="submit">Add flashcard</button>
+            </form>
+            <div class="toolbar">
+                <button class="ghost-btn" type="button" id="shuffle">Shuffle deck</button>
+                <button class="ghost-btn" type="button" id="toggle-all">Reveal all</button>
+                <button class="ghost-btn" type="button" id="clear-cards">Clear deck</button>
+            </div>
+        </section>
+
+        <section aria-labelledby="deck-title">
+            <h2 id="deck-title">Deck overview <span>// active cards</span></h2>
+            <div class="flashcard-grid" id="flashcard-list">
+                <p class="empty-state">No flashcards yet. Capture your first cue to populate the deck.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const flashcardForm = document.getElementById("flashcard-form");
+        const flashcardList = document.getElementById("flashcard-list");
+        const shuffleBtn = document.getElementById("shuffle");
+        const toggleAllBtn = document.getElementById("toggle-all");
+        const clearCardsBtn = document.getElementById("clear-cards");
+
+        const flashcards = [];
+        let revealAll = false;
+
+        flashcardForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const question = document.getElementById("question").value.trim();
+            const answer = document.getElementById("answer").value.trim();
+            if (!question || !answer) return;
+            flashcards.unshift({ question, answer });
+            flashcardForm.reset();
+            renderFlashcards();
+        });
+
+        shuffleBtn.addEventListener("click", () => {
+            for (let i = flashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+            }
+            renderFlashcards();
+        });
+
+        toggleAllBtn.addEventListener("click", () => {
+            revealAll = !revealAll;
+            toggleAllBtn.textContent = revealAll ? "Hide all" : "Reveal all";
+            applyRevealAll();
+        });
+
+        clearCardsBtn.addEventListener("click", () => {
+            if (!flashcards.length) return;
+            if (confirm("Clear every flashcard?")) {
+                flashcards.length = 0;
+                revealAll = false;
+                toggleAllBtn.textContent = "Reveal all";
+                renderFlashcards();
+            }
+        });
+
+        function renderFlashcards() {
+            flashcardList.innerHTML = "";
+            if (!flashcards.length) {
+                flashcardList.innerHTML = '<p class="empty-state">No flashcards yet. Capture your first cue to populate the deck.</p>';
+                return;
+            }
+
+            flashcards.forEach(({ question, answer }) => {
+                const card = document.createElement("article");
+                card.className = "card";
+                card.tabIndex = 0;
+                card.setAttribute("aria-label", "Flashcard");
+
+                const inner = document.createElement("div");
+                inner.className = "card-inner";
+
+                const front = document.createElement("div");
+                front.className = "card-face card-front";
+                front.innerHTML = `
+                    <span class="eyebrow">Prompt</span>
+                    <h3>${question}</h3>
+                    <p class="hint">Hover or tap to flip.</p>
+                `;
+
+                const back = document.createElement("div");
+                back.className = "card-face card-back";
+                back.innerHTML = `
+                    <span class="eyebrow">Answer</span>
+                    <p>${answer}</p>
+                `;
+
+                inner.append(front, back);
+                card.append(inner);
+
+                card.addEventListener("click", () => {
+                    card.classList.toggle("is-flipped");
+                });
+
+                card.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        card.classList.toggle("is-flipped");
+                    }
+                });
+
+                flashcardList.appendChild(card);
+            });
+
+            applyRevealAll();
+        }
+
+        function applyRevealAll() {
+            const cards = flashcardList.querySelectorAll(".card");
+            cards.forEach((card) => {
+                if (revealAll) {
+                    card.classList.add("force-flipped");
+                } else {
+                    card.classList.remove("force-flipped");
+                }
+            });
+        }
+    </script>
+    <footer style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.9rem;">
+        Palette inspired by Color Hunt’s curated combo (#F1F3E0 · #D2DCB6 · #A1BC98 · #778873). <a href="https://colorhunt.co/palette/f1f3e0d2dcb6a1bc98778873" target="_blank" rel="noopener" style="color:var(--pine);font-weight:600;">View palette</a>
+    </footer>
+</body>
+</html>
+

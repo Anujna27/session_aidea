@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Study Management Hub</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --accent-dark: #0ea5e9;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at top, rgba(56, 189, 248, 0.15), transparent 60%), var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        header {
+            padding: 3rem 1rem 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem 2rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        section {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            box-shadow: 0 20px 40px rgba(2, 6, 23, 0.35);
+        }
+
+        section h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+
+        input, textarea, button, select {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button, .flashcard-actions button {
+            width: auto;
+            background: linear-gradient(120deg, var(--accent), var(--accent-dark));
+            border: none;
+            cursor: pointer;
+            padding: 0.9rem 1.35rem;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover, .flashcard-actions button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35);
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .score-list {
+            margin-top: 1rem;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .score-list th, .score-list td {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 0.7rem 0;
+            text-align: left;
+        }
+
+        .score-list th {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .suggestion-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            font-size: 0.85rem;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .suggestion-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 0.9rem;
+            padding: 1rem;
+            flex: 1 1 230px;
+        }
+
+        .flashcards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .flashcard {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.9rem;
+            padding: 1rem;
+            min-height: 140px;
+            position: relative;
+        }
+
+        .flashcard button {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            padding: 0.5rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .flashcard form button {
+            position: static;
+            margin-top: 0.5rem;
+        }
+
+        .flashcard-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .flashcard-actions button {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        @media (max-width: 640px) {
+            section {
+                padding: 1.25rem;
+            }
+
+            .flashcard-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Study Management Hub</h1>
+        <p class="lead">Track your scores, get targeted improvement ideas, and drill topics with adaptive flashcards.</p>
+    </header>
+    <main>
+        <section aria-labelledby="scores-title">
+            <h2 id="scores-title">Progress Tracker</h2>
+            <p>Log recent assessments and let the AI-inspired helper suggest focused practice areas.</p>
+            <form id="score-form">
+                <div class="score-grid">
+                    <div>
+                        <label for="topic">Topic / Skill</label>
+                        <input id="topic" name="topic" type="text" placeholder="e.g., Linear Algebra" required />
+                    </div>
+                    <div>
+                        <label for="score">Score (%)</label>
+                        <input id="score" name="score" type="number" min="0" max="100" placeholder="78" required />
+                    </div>
+                    <div>
+                        <label for="goal">Target (%)</label>
+                        <input id="goal" name="goal" type="number" min="0" max="100" placeholder="90" required />
+                    </div>
+                    <div>
+                        <label for="notes">Context / Notes</label>
+                        <input id="notes" name="notes" type="text" placeholder="Struggled with proofs" />
+                    </div>
+                </div>
+                <button type="submit" style="margin-top: 1rem;">Add score</button>
+            </form>
+
+            <table class="score-list" id="score-table" aria-live="polite">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Score</th>
+                        <th>Target</th>
+                        <th>Gap</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="score-body">
+                    <tr class="empty-state">
+                        <td colspan="5">No scores yet. Start logging to uncover trends.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="suggestions" id="suggestions" aria-live="polite"></div>
+        </section>
+
+        <section aria-labelledby="flashcards-title">
+            <h2 id="flashcards-title">Flashcard Studio</h2>
+            <p>Build targeted flashcards on a dedicated canvas optimized with the new palette.</p>
+            <a href="flashcards.html" style="display:inline-flex;align-items:center;gap:0.5rem;margin-top:1rem;text-decoration:none;">
+                <button type="button">Launch flashcards page</button>
+            </a>
+            <p style="margin-top:0.75rem;">Tip: log your weakest topics above, then spin up cards focused on those gaps.</p>
+        </section>
+    </main>
+
+    <script>
+        const scoreForm = document.getElementById("score-form");
+        const scoreBody = document.getElementById("score-body");
+        const suggestionsContainer = document.getElementById("suggestions");
+
+        const scores = [];
+
+        function renderScores() {
+            scoreBody.innerHTML = "";
+
+            if (!scores.length) {
+                scoreBody.innerHTML = '<tr class="empty-state"><td colspan="5">No scores yet. Start logging to uncover trends.</td></tr>';
+                suggestionsContainer.innerHTML = "";
+                return;
+            }
+
+            scores.forEach(({ topic, score, goal, notes }) => {
+                const row = document.createElement("tr");
+                const gap = goal - score;
+                row.innerHTML = `
+                    <td>${topic}</td>
+                    <td>${score}%</td>
+                    <td>${goal}%</td>
+                    <td>${gap > 0 ? `<span class="suggestion-pill">-${gap}%</span>` : "On track"}</td>
+                    <td>${notes || "—"}</td>
+                `;
+                scoreBody.appendChild(row);
+            });
+
+            renderSuggestions();
+        }
+
+        function renderSuggestions() {
+            suggestionsContainer.innerHTML = "";
+            const focusAreas = scores
+                .filter(({ score, goal }) => score < goal)
+                .sort((a, b) => (a.score - a.goal) - (b.score - b.goal))
+                .slice(0, 4);
+
+            if (!focusAreas.length) {
+                suggestionsContainer.innerHTML = '<p class="empty-state">No improvement gaps detected. Keep reinforcing your strengths!</p>';
+                return;
+            }
+
+            focusAreas.forEach(({ topic, score, goal, notes }) => {
+                const card = document.createElement("article");
+                card.className = "suggestion-card";
+                card.innerHTML = `
+                    <h3>${topic}</h3>
+                    <p>Current score: <strong>${score}%</strong> · Goal: <strong>${goal}%</strong></p>
+                    <p>Next step: Focus on ${notes || "core practice sets"} and schedule a review sprint.</p>
+                    <p style="margin-top:0.5rem;">AI tip: Pair flashcards + targeted problem sets to close the ${(goal - score)}% gap.</p>
+                `;
+                suggestionsContainer.appendChild(card);
+            });
+        }
+
+        scoreForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(scoreForm);
+            const topic = formData.get("topic").trim();
+            const scoreValue = Number(formData.get("score"));
+            const goalValue = Number(formData.get("goal"));
+            const notes = formData.get("notes").trim();
+
+            if (!topic) return;
+            scores.unshift({
+                topic,
+                score: clamp(scoreValue, 0, 100),
+                goal: clamp(goalValue, 0, 100),
+                notes,
+            });
+
+            scoreForm.reset();
+            renderScores();
+        });
+
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+    </script>
+</body>
+</html>
